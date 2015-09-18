@@ -2,6 +2,7 @@ require 'sinatra'
 require 'sinatra/json'
 require 'json'
 require 'opencv'
+require 'base64'
 
 
 include OpenCV
@@ -69,8 +70,11 @@ get '/' do
   redirect '/index.html'
 end
 
-get '/notes' do
-  @img = CvMat.load('./lena-32x32.jpg')
+post '/notes' do
+  dat = params['data']
+  dat = Base64.decode64(dat.split(',')[1])
+
+  @img = CvMat.decode_image(dat)
   avg = @img.avg
   b, g, r = avg[0].to_i, avg[1].to_i, avg[2].to_i
   key = (b+g+r) % KEYS.count
@@ -87,13 +91,14 @@ get '/notes' do
       val = b + g + r
 
       # Max 10 bits of info.
-      del = (val & 0b1110000000) >> 7
+      del = (val & 0b0110000000) >> 7
       chd = (val & 0b0001110000) >> 4
       exc = (val & 0b0000001100) >> 2
       vol = (val & 0b0000000011)
+      arp = !(val & 0b1000000000) || rand > 0.6
 
       chd = rand(0..5) if chd > 5 # To avoid bias, randomize instead of mod
-      exc = exc%3 + 1
+      exc = exc%2 + 1
 
       octave = 60
       chord = CHORDS[chording[chd]]
@@ -102,7 +107,8 @@ get '/notes' do
         bit += chord.map {|x| NOTES[x] + octave}
         octave += 12
       end
-      response << [bit, vol, del]
+      #bit.reverse! if rand > 0.5
+      response << [bit, vol, del, arp]
     end
   end
   content_type :json
