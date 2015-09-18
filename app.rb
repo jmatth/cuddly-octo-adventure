@@ -65,6 +65,10 @@ KEYS = [
 ]
 KEYNAMES = %w{ A B C D E F G }
 
+get '/' do
+  redirect '/index.html'
+end
+
 get '/notes' do
   @img = CvMat.load('./lena-32x32.jpg')
   avg = @img.avg
@@ -89,9 +93,9 @@ get '/notes' do
       vol = (val & 0b0000000011)
 
       chd = rand(0..5) if chd > 5 # To avoid bias, randomize instead of mod
+      exc = exc%3 + 1
 
-
-      octave = 0
+      octave = 60
       chord = CHORDS[chording[chd]]
       bit = []
       exc.times do
