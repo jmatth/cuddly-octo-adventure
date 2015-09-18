@@ -50,7 +50,7 @@ CHORDS = {
   "fsm" => %w{Fs A Cs},
   "gsm" => %w{Gs B Ds},
 
-  "bfM" => %w{Bn D F},
+  "bfM" => %w{Bb D F},
   "fsM" => %w{Fs As Cs},
 }
 
